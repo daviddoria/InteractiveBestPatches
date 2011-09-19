@@ -84,6 +84,8 @@ public slots:
   void on_txtTargetY_returnPressed();
   
   void on_btnCompute_clicked();
+
+  void on_chkFillPatch_clicked();
   
   void RefreshSlot();
   
@@ -146,6 +148,8 @@ protected:
   QGraphicsScene* TargetPatchScene;
   
   SelfPatchCompare PatchCompare;
+
+  unsigned int DisplayedSourcePatch;
 };
 
 #endif // Form_H

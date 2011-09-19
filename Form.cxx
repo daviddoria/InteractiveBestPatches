@@ -410,7 +410,7 @@ void Form::PatchesMoved()
   QImage targetImage = GetTargetQImage(targetRegion);
   
   this->TargetPatchScene->addPixmap(QPixmap::fromImage(targetImage));
-  
+
   Refresh();
 
 }
@@ -568,6 +568,9 @@ void Form::on_btnCompute_clicked()
   this->PatchCompare.ComputePatchScores();
   
   DisplaySourcePatches();
+
+  // Automatically display the best patch
+  PatchClickedSlot(0);
 }
 
 itk::ImageRegion<2> Form::GetTargetRegion()
@@ -583,10 +586,15 @@ itk::ImageRegion<2> Form::GetTargetRegion()
   return region;
 }
 
+void Form::on_chkFillPatch_clicked()
+{
+  PatchClickedSlot(this->DisplayedSourcePatch);
+}
 
 void Form::PatchClickedSlot(const unsigned int value)
 {
   // 'value' here is the "ith best match". E.g. the third best match would have value=2.
+  this->DisplayedSourcePatch = value;
   
   std::cout << "PatchClickedSlot " << value << std::endl;
   
@@ -595,6 +603,17 @@ void Form::PatchClickedSlot(const unsigned int value)
   std::cout << "Region: " << patch.Region << std::endl;
   
   this->SourcePatchSlice->SetPosition(patch.Region.GetIndex()[0], patch.Region.GetIndex()[1], 0);
-  
+
+
+  if(this->chkFillPatch->isChecked())
+    {
+    Helpers::ITKRegionToVTKImage(this->Image, patch.Region, this->TargetPatch);
+    Helpers::OutlineImage(this->TargetPatch, this->Red);
+    }
+  else
+    {
+    Helpers::BlankAndOutlineImage(this->TargetPatch, this->Red);
+    }
+
   Refresh();
 }

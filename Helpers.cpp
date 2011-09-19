@@ -418,6 +418,9 @@ void ITKImagetoVTKMagnitudeImage(FloatVectorImageType::Pointer image, vtkImageDa
 
 void BlankAndOutlineImage(vtkImageData* image, const unsigned char color[3])
 {
+  image->SetNumberOfScalarComponents(4);
+  image->AllocateScalars();
+  
   int dims[3];
   image->GetDimensions(dims);
   
@@ -431,14 +434,14 @@ void BlankAndOutlineImage(vtkImageData* image, const unsigned char color[3])
 	pixel[0] = color[0];
 	pixel[1] = color[1];
 	pixel[2] = color[2];
-	pixel[3] = 255;
+	pixel[3] = 255; // visible
 	}
       else
 	{
 	pixel[0] = 0;
 	pixel[1] = 0;
 	pixel[2] = 0;
-	pixel[3] = 0;
+	pixel[3] = 0; // transparent
 	}
       }
     }

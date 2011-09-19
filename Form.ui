@@ -165,7 +165,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QVTKWidget" name="qvtkWidget" native="true"/>
+       <widget class="QVTKWidget" name="qvtkWidget"/>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0,5">
@@ -180,11 +180,22 @@
          <widget class="QGraphicsView" name="gfxTarget"/>
         </item>
         <item>
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>Best source patches:</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Best source patches:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkFillPatch">
+            <property name="text">
+             <string>Fill patch</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QTableWidget" name="tableWidget"/>
