@@ -68,6 +68,8 @@ public slots:
   
   void PatchClickedSlot(const unsigned int);
   
+  void on_chkShowMask_clicked();
+  
   void on_actionOpenImage_activated();
   void on_actionOpenMask_activated();
   void on_actionOpenMaskInverted_activated();
@@ -84,6 +86,7 @@ public slots:
   void on_txtTargetY_returnPressed();
   
   void on_btnCompute_clicked();
+  void on_btnResort_clicked();
 
   void on_chkFillPatch_clicked();
   

@@ -193,9 +193,16 @@ void SetMaskTransparency(Mask::Pointer input, vtkImageData* outputImage)
     {
     unsigned char* pixel = static_cast<unsigned char*>(outputImage->GetScalarPointer(imageIterator.GetIndex()[0],
                                                                                      imageIterator.GetIndex()[1],0));
+    /*
     // Set masked pixels to bright green and opaque. Set non-masked pixels to black and fully transparent.
     pixel[0] = 0;
     pixel[1] = imageIterator.Get();
+    pixel[2] = 0;
+    */
+    
+    // Set masked pixels to bright red and opaque. Set non-masked pixels to black and fully transparent.
+    pixel[0] = imageIterator.Get();
+    pixel[1] = 0;
     pixel[2] = 0;
     
     if(input->IsHole(imageIterator.GetIndex()))

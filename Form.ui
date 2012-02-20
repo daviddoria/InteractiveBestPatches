@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1030</width>
-    <height>841</height>
+    <width>1374</width>
+    <height>970</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,159 +16,115 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,3,2">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="3">
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
         <item>
-         <widget class="QGroupBox" name="groupBox">
-          <property name="title">
-           <string>Settings</string>
-          </property>
-          <widget class="QLabel" name="label">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>40</y>
-             <width>91</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Patch Radius</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="txtPatchRadius">
-           <property name="geometry">
-            <rect>
-             <x>100</x>
-             <y>40</y>
-             <width>31</width>
-             <height>27</height>
-            </rect>
-           </property>
-           <property name="toolTip">
-            <string>Sets the width/height of a square patch</string>
-           </property>
-           <property name="text">
-            <string>10</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_3">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>70</y>
-             <width>161</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>&lt;font color=&quot;red&quot;&gt;Target Patch Corner&lt;/font&gt;</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="txtTargetX">
-           <property name="geometry">
-            <rect>
-             <x>30</x>
-             <y>110</y>
-             <width>31</width>
-             <height>27</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="txtTargetY">
-           <property name="geometry">
-            <rect>
-             <x>100</x>
-             <y>110</y>
-             <width>31</width>
-             <height>27</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_4">
-           <property name="geometry">
-            <rect>
-             <x>10</x>
-             <y>110</y>
-             <width>21</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_7">
-           <property name="geometry">
-            <rect>
-             <x>80</x>
-             <y>110</y>
-             <width>21</width>
-             <height>17</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Y</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="btnCompute">
-           <property name="geometry">
-            <rect>
-             <x>20</x>
-             <y>150</y>
-             <width>97</width>
-             <height>27</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Compute</string>
-           </property>
-          </widget>
-          <widget class="QLabel" name="label_6">
-           <property name="geometry">
-            <rect>
-             <x>20</x>
-             <y>200</y>
-             <width>91</width>
-             <height>41</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Number of best patches:</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-          <widget class="QLineEdit" name="txtNumberOfPatches">
-           <property name="geometry">
-            <rect>
-             <x>40</x>
-             <y>240</y>
-             <width>31</width>
-             <height>27</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>5</string>
-           </property>
-          </widget>
-         </widget>
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Number of best patches:</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtNumberOfPatches">
+              <property name="text">
+               <string>5</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>&lt;font color=&quot;red&quot;&gt;Target Patch Corner&lt;/font&gt;</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtTargetX">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Y</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtTargetY">
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Patch Radius</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="txtPatchRadius">
+              <property name="toolTip">
+               <string>Sets the width/height of a square patch</string>
+              </property>
+              <property name="text">
+               <string>10</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkShowMask">
+            <property name="text">
+             <string>Show mask</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnCompute">
+            <property name="text">
+             <string>Compute</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QVTKWidget" name="qvtkWidget"/>
+       <widget class="QVTKWidget" name="qvtkWidget" native="true"/>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0,5">
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0,5,0">
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
@@ -198,7 +154,93 @@
          </layout>
         </item>
         <item>
-         <widget class="QTableWidget" name="tableWidget"/>
+         <widget class="QTableWidget" name="tableWidget">
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Patch</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Index</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Total Absolute</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Average Absolute</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Total Squared</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Average Squared</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Sort by:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radTotalAbsolute">
+            <property name="text">
+             <string>Total Absolute</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radAverageAbsolute">
+            <property name="text">
+             <string>Average Absolute</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radTotalSquared">
+            <property name="text">
+             <string>Total Squared</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radAverageSquared">
+            <property name="text">
+             <string>Average Squared</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnResort">
+            <property name="text">
+             <string>Re-sort</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -211,8 +253,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1030</width>
-     <height>25</height>
+     <width>1374</width>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLeft_Pane">

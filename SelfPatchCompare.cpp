@@ -25,6 +25,8 @@
 SelfPatchCompare::SelfPatchCompare(const unsigned int components)
 {
   this->NumberOfComponentsPerPixel = components;
+  
+  this->NumberOfPixelsCompared = 0;
 }
 
 void SelfPatchCompare::ComputeSourcePatches()
@@ -114,7 +116,7 @@ float SelfPatchCompare::PixelDifference(const VectorType &a, const VectorType &b
 }
 
 
-float SelfPatchCompare::SlowDifference(const itk::ImageRegion<2>& sourceRegion)
+float SelfPatchCompare::SlowTotalAbsoluteDifference(const itk::ImageRegion<2>& sourceRegion)
 {
   // This function assumes that all pixels in the source region are unmasked.
   
@@ -130,8 +132,7 @@ float SelfPatchCompare::SlowDifference(const itk::ImageRegion<2>& sourceRegion)
   itk::ImageRegionConstIterator<Mask> maskIterator(this->MaskImage, this->TargetRegion);
 
   float sumDifferences = 0;
-  float sumSquaredDifferences = 0;
-  unsigned int validPixelCounter = 0;
+  this->NumberOfPixelsCompared = 0;
   
   float difference = 0;
   
@@ -146,14 +147,8 @@ float SelfPatchCompare::SlowDifference(const itk::ImageRegion<2>& sourceRegion)
             
       difference = PixelDifference(sourcePixel, targetPixel);
       sumDifferences +=  difference;
-    
-      //std::cout << "Source pixel: " << sourcePixel << " target pixel: " << targetPixel << "Difference: " << difference << " squaredDifference: " << squaredDifference << std::endl;
-    
-      
-      //float squaredDifference = PixelSquaredDifference(sourcePixel, targetPixel);
-      //sumSquaredDifferences +=  squaredDifference;
-      
-      validPixelCounter++;
+
+      this->NumberOfPixelsCompared++;
       }
 
     ++sourcePatchIterator;
@@ -161,17 +156,147 @@ float SelfPatchCompare::SlowDifference(const itk::ImageRegion<2>& sourceRegion)
     ++maskIterator;
     } // end while iterate over sourcePatch
 
-  //std::cout << "totalDifference: " << sum << std::endl;
-  //std::cout << "Valid pixels: " << validPixelCounter << std::endl;
-
-  if(validPixelCounter == 0)
-    {
-    return 0;
-    }
-  //float averageDifference = sum/static_cast<float>(validPixelCounter);
-  //return averageDifference;
   return sumDifferences;
+}
 
+
+float SelfPatchCompare::SlowTotalSquaredDifference(const itk::ImageRegion<2>& sourceRegion)
+{
+  // This function assumes that all pixels in the source region are unmasked.
+
+  // This method uses 3 iterators - one for the mask, and one for each image patch.
+  // The entire mask is traversed looking for valid pixels, and then comparing the image pixels.
+  // This is very inefficient because, since the target region stays constant for many thousands of patch
+  // comparisons, the mask need only be traversed once. This method is performed by ComputeOffsets()
+  // and PatchDifference*(). This function is only here for comparison purposes (to ensure the result of the other functions
+  // is correct).
+
+  itk::ImageRegionConstIterator<FloatVectorImageType> sourcePatchIterator(this->Image, sourceRegion);
+  itk::ImageRegionConstIterator<FloatVectorImageType> targetPatchIterator(this->Image, this->TargetRegion);
+  itk::ImageRegionConstIterator<Mask> maskIterator(this->MaskImage, this->TargetRegion);
+
+  float sumSquaredDifferences = 0;
+  this->NumberOfPixelsCompared = 0;
+
+  float squaredDifference = 0;
+
+  while(!sourcePatchIterator.IsAtEnd())
+    {
+    itk::Index<2> currentPixel = maskIterator.GetIndex();
+    if(this->MaskImage->IsValid(currentPixel))
+      {
+      //std::cout << "Offset from iterator: " << this->Image->ComputeOffset(maskIterator.GetIndex()) * componentsPerPixel;
+      FloatVectorImageType::PixelType sourcePixel = sourcePatchIterator.Get();
+      FloatVectorImageType::PixelType targetPixel = targetPatchIterator.Get();
+
+      squaredDifference = PixelSquaredDifference(sourcePixel, targetPixel);
+
+      //std::cout << "Source pixel: " << sourcePixel << " target pixel: " << targetPixel << "Difference: " << difference << " squaredDifference: " << squaredDifference << std::endl;
+
+      sumSquaredDifferences +=  squaredDifference;
+
+      this->NumberOfPixelsCompared++;
+      }
+
+    ++sourcePatchIterator;
+    ++targetPatchIterator;
+    ++maskIterator;
+    } // end while iterate over sourcePatch
+
+  return sumSquaredDifferences;
+}
+
+
+float SelfPatchCompare::SlowAverageAbsoluteDifference(const itk::ImageRegion<2>& sourceRegion)
+{
+  // This function assumes that all pixels in the source region are unmasked.
+
+  // This method uses 3 iterators - one for the mask, and one for each image patch.
+  // The entire mask is traversed looking for valid pixels, and then comparing the image pixels.
+  // This is very inefficient because, since the target region stays constant for many thousands of patch
+  // comparisons, the mask need only be traversed once. This method is performed by ComputeOffsets()
+  // and PatchDifference*(). This function is only here for comparison purposes (to ensure the result of the other functions
+  // is correct).
+
+  itk::ImageRegionConstIterator<FloatVectorImageType> sourcePatchIterator(this->Image, sourceRegion);
+  itk::ImageRegionConstIterator<FloatVectorImageType> targetPatchIterator(this->Image, this->TargetRegion);
+  itk::ImageRegionConstIterator<Mask> maskIterator(this->MaskImage, this->TargetRegion);
+
+  float sumDifferences = 0;
+  this->NumberOfPixelsCompared = 0;
+
+  float difference = 0;
+
+  while(!sourcePatchIterator.IsAtEnd())
+    {
+    itk::Index<2> currentPixel = maskIterator.GetIndex();
+    if(this->MaskImage->IsValid(currentPixel))
+      {
+      //std::cout << "Offset from iterator: " << this->Image->ComputeOffset(maskIterator.GetIndex()) * componentsPerPixel;
+      FloatVectorImageType::PixelType sourcePixel = sourcePatchIterator.Get();
+      FloatVectorImageType::PixelType targetPixel = targetPatchIterator.Get();
+
+      difference = PixelDifference(sourcePixel, targetPixel);
+      sumDifferences +=  difference;
+
+      this->NumberOfPixelsCompared++;
+      }
+
+    ++sourcePatchIterator;
+    ++targetPatchIterator;
+    ++maskIterator;
+    } // end while iterate over sourcePatch
+
+  float averageDifferences = sumDifferences / static_cast<float>(this->NumberOfPixelsCompared);
+  return averageDifferences;
+}
+
+
+float SelfPatchCompare::SlowAverageSquaredDifference(const itk::ImageRegion<2>& sourceRegion)
+{
+  // This function assumes that all pixels in the source region are unmasked.
+
+  // This method uses 3 iterators - one for the mask, and one for each image patch.
+  // The entire mask is traversed looking for valid pixels, and then comparing the image pixels.
+  // This is very inefficient because, since the target region stays constant for many thousands of patch
+  // comparisons, the mask need only be traversed once. This method is performed by ComputeOffsets()
+  // and PatchDifference*(). This function is only here for comparison purposes (to ensure the result of the other functions
+  // is correct).
+
+  itk::ImageRegionConstIterator<FloatVectorImageType> sourcePatchIterator(this->Image, sourceRegion);
+  itk::ImageRegionConstIterator<FloatVectorImageType> targetPatchIterator(this->Image, this->TargetRegion);
+  itk::ImageRegionConstIterator<Mask> maskIterator(this->MaskImage, this->TargetRegion);
+
+  float sumSquaredDifferences = 0;
+  this->NumberOfPixelsCompared = 0;
+
+  float squaredDifference = 0;
+
+  while(!sourcePatchIterator.IsAtEnd())
+    {
+    itk::Index<2> currentPixel = maskIterator.GetIndex();
+    if(this->MaskImage->IsValid(currentPixel))
+      {
+      //std::cout << "Offset from iterator: " << this->Image->ComputeOffset(maskIterator.GetIndex()) * componentsPerPixel;
+      FloatVectorImageType::PixelType sourcePixel = sourcePatchIterator.Get();
+      FloatVectorImageType::PixelType targetPixel = targetPatchIterator.Get();
+
+      squaredDifference = PixelSquaredDifference(sourcePixel, targetPixel);
+
+      //std::cout << "Source pixel: " << sourcePixel << " target pixel: " << targetPixel << "Difference: " << difference << " squaredDifference: " << squaredDifference << std::endl;
+
+      sumSquaredDifferences +=  squaredDifference;
+
+      this->NumberOfPixelsCompared++;
+      }
+
+    ++sourcePatchIterator;
+    ++targetPatchIterator;
+    ++maskIterator;
+    } // end while iterate over sourcePatch
+
+  float averageSquaredDifferences = sumSquaredDifferences / static_cast<float>(this->NumberOfPixelsCompared);
+  return averageSquaredDifferences;
 }
 
 void SelfPatchCompare::ComputePatchScores()
@@ -179,10 +304,23 @@ void SelfPatchCompare::ComputePatchScores()
   ComputeSourcePatches();
   for(unsigned int i = 0; i < this->SourcePatches.size(); ++i)
     {
-    float difference = SlowDifference(this->SourcePatches[i].Region);
-    this->SourcePatches[i].Score = difference;
+    float totalAbsoluteScore = SlowTotalAbsoluteDifference(this->SourcePatches[i].Region);
+    float averageAbsoluteScore = SlowAverageAbsoluteDifference(this->SourcePatches[i].Region);
+    float totalSquaredScore = SlowTotalSquaredDifference(this->SourcePatches[i].Region);
+    float averageSquaredScore = SlowAverageSquaredDifference(this->SourcePatches[i].Region);
+  
+    if(this->NumberOfPixelsCompared == 0)
+      {
+      std::cerr << "No pixels were compared!" << std::endl;
+      return;
+      }
+
+    this->SourcePatches[i].TotalAbsoluteScore = totalAbsoluteScore;
+    this->SourcePatches[i].AverageAbsoluteScore = averageAbsoluteScore;
+    this->SourcePatches[i].TotalSquaredScore = totalSquaredScore;
+    this->SourcePatches[i].AverageSquaredScore = averageSquaredScore;
     this->SourcePatches[i].Id = i;
     }
     
-  std::sort(this->SourcePatches.begin(), this->SourcePatches.end());
+  std::sort(this->SourcePatches.begin(), this->SourcePatches.end(), SortByTotalAbsoluteScore);
 }

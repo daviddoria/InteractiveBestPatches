@@ -86,17 +86,6 @@ Form::Form()
 {
   this->setupUi(this);
   
-  this->tableWidget->setColumnCount(3);
-  QTableWidgetItem* header0 = new QTableWidgetItem;
-  header0->setText("Patch");
-  QTableWidgetItem* header1 = new QTableWidgetItem;
-  header1->setText("Index");
-  QTableWidgetItem* header2 = new QTableWidgetItem;
-  header2->setText("Difference");
-  this->tableWidget->setHorizontalHeaderItem(0, header0);
-  this->tableWidget->setHorizontalHeaderItem(1, header1);
-  this->tableWidget->setHorizontalHeaderItem(2, header2);
- 
   this->TargetPatchScene = new QGraphicsScene();
   this->gfxTarget->setScene(TargetPatchScene);
   
@@ -176,7 +165,31 @@ Form::Form()
   this->MaskImage = NULL;
   
   this->InteractorStyle->TrackballStyle->AddObserver(CustomTrackballStyle::PatchesMovedEvent, this, &Form::PatchesMoved);
+  
+  this->tableWidget->resizeColumnsToContents();
 };
+
+void Form::on_btnResort_clicked()
+{
+  if(this->radTotalAbsolute->isChecked())
+    {
+    std::sort(this->PatchCompare.SourcePatches.begin(), this->PatchCompare.SourcePatches.end(), SortByTotalAbsoluteScore);
+    }
+  else if(this->radAverageAbsolute->isChecked())
+    {
+    std::sort(this->PatchCompare.SourcePatches.begin(), this->PatchCompare.SourcePatches.end(), SortByAverageAbsoluteScore);
+    }
+  else if(this->radTotalSquared->isChecked())
+    {
+    std::sort(this->PatchCompare.SourcePatches.begin(), this->PatchCompare.SourcePatches.end(), SortByTotalSquaredScore);
+    }
+  else if(this->radAverageSquared->isChecked())
+    {
+    std::sort(this->PatchCompare.SourcePatches.begin(), this->PatchCompare.SourcePatches.end(), SortByAverageSquaredScore);
+    }
+    
+  DisplaySourcePatches();
+}
 
 void Form::on_actionQuit_activated()
 {
@@ -299,7 +312,7 @@ void Form::on_actionOpenMaskInverted_activated()
 void Form::on_actionOpenMask_activated()
 {
   // Get a filename to open
-  QString fileName = QFileDialog::getOpenFileName(this, "Open File", ".", "Image Files (*.png *.bmp)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Open File", ".", "Image Files (*.png *.bmp);;Image Files (*.mha)");
 
   std::cout << "Got filename: " << fileName.toStdString() << std::endl;
   if(fileName.toStdString().empty())
@@ -342,6 +355,8 @@ void Form::RefreshSlot()
 void Form::Refresh()
 {
   //std::cout << "Refresh()" << std::endl;
+  
+  this->MaskImageSlice->SetVisibility(this->chkShowMask->isChecked());
   
   this->qvtkWidget->GetRenderWindow()->Render();
   
@@ -513,7 +528,6 @@ void Form::DisplaySourcePatches()
   // Clear the table
   this->tableWidget->setRowCount(0);
   
-  
   for(unsigned int i = 0; i < numberOfPatches; ++i)
     {
     this->tableWidget->insertRow(this->tableWidget->rowCount());
@@ -537,13 +551,26 @@ void Form::DisplaySourcePatches()
     QTableWidgetItem* indexLabel = new QTableWidgetItem;
     indexLabel->setText(ssLabel.str().c_str());
     this->tableWidget->setItem(i,1,indexLabel);
-    
-    std::stringstream ssScore;
-    ssScore << currentPatch.Score;
-    
-    QTableWidgetItem* scoreLabel = new QTableWidgetItem;
-    scoreLabel->setText(ssScore.str().c_str());
-    this->tableWidget->setItem(i,2,scoreLabel);
+
+    // Total absolute score
+    QTableWidgetItem* totalAbsoluteScoreLabel = new QTableWidgetItem;
+    totalAbsoluteScoreLabel->setData(Qt::DisplayRole, currentPatch.TotalAbsoluteScore);
+    this->tableWidget->setItem(i,2,totalAbsoluteScoreLabel);
+
+    // Average absolute score
+    QTableWidgetItem* averageAbsoluteScoreLabel = new QTableWidgetItem;
+    averageAbsoluteScoreLabel->setData(Qt::DisplayRole, currentPatch.AverageAbsoluteScore);
+    this->tableWidget->setItem(i,3,averageAbsoluteScoreLabel);
+
+    // Total squared score
+    QTableWidgetItem* totalSquaredScoreLabel = new QTableWidgetItem;
+    totalSquaredScoreLabel->setData(Qt::DisplayRole, currentPatch.TotalSquaredScore);
+    this->tableWidget->setItem(i,4,totalSquaredScoreLabel);
+
+    // Average squared score
+    QTableWidgetItem* averageSquaredScoreLabel = new QTableWidgetItem;
+    averageSquaredScoreLabel->setData(Qt::DisplayRole, currentPatch.AverageSquaredScore);
+    this->tableWidget->setItem(i,5,averageSquaredScoreLabel);
     }
     
   this->tableWidget->resizeRowsToContents();
@@ -553,6 +580,8 @@ void Form::DisplaySourcePatches()
 
 void Form::on_btnCompute_clicked()
 {
+  PositionTarget();
+  
   this->PatchCompare.SetNumberOfComponentsPerPixel(this->Image->GetNumberOfComponentsPerPixel());
   this->PatchCompare.SetImage(this->Image);
   this->PatchCompare.SetMask(this->MaskImage);
@@ -615,5 +644,10 @@ void Form::PatchClickedSlot(const unsigned int value)
     Helpers::BlankAndOutlineImage(this->TargetPatch, this->Red);
     }
 
+  Refresh();
+}
+
+void Form::on_chkShowMask_clicked()
+{
   Refresh();
 }

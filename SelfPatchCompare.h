@@ -59,7 +59,11 @@ public:
 
   void SetTargetRegion(const itk::ImageRegion<2>&);
 
-  float SlowDifference(const itk::ImageRegion<2>& sourceRegion);
+  float SlowTotalAbsoluteDifference(const itk::ImageRegion<2>& sourceRegion);
+  float SlowTotalSquaredDifference(const itk::ImageRegion<2>& sourceRegion);
+
+  float SlowAverageAbsoluteDifference(const itk::ImageRegion<2>& sourceRegion);
+  float SlowAverageSquaredDifference(const itk::ImageRegion<2>& sourceRegion);
   
   bool IsReady();
   
@@ -72,6 +76,8 @@ public:
   
   // These are the fully valid source regions
   std::vector<Patch> SourcePatches;
+  
+  //std::vector<Patch>& GetSourcePatches();
   
 protected:
   // If a channel of one pixel was white (255) and the corresponding channel of the other pixel
@@ -91,6 +97,8 @@ protected:
   Mask::Pointer MaskImage;
 
   unsigned int NumberOfComponentsPerPixel;
+  
+  unsigned int NumberOfPixelsCompared;
 
 };
 

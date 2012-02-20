@@ -11,11 +11,18 @@ public:
   Patch(const itk::ImageRegion<2>& region);
     
   itk::ImageRegion<2> Region;
-  float Score;
+  float TotalAbsoluteScore;
+  float AverageAbsoluteScore;
+  float TotalSquaredScore;
+  float AverageSquaredScore;
   unsigned int Id;
+
+  void DefaultConstructor();
 };
 
-//inline bool operator<(Patch patch1, Patch patch2); // without inline, there are "multiple definition" errors
-bool operator<(Patch patch1, Patch patch2); // without inline, there are "multiple definition" errors
+bool SortByTotalAbsoluteScore(const Patch& patch1, const Patch& patch2);
+bool SortByAverageAbsoluteScore(const Patch& patch1, const Patch& patch2);
+bool SortByTotalSquaredScore(const Patch& patch1, const Patch& patch2);
+bool SortByAverageSquaredScore(const Patch& patch1, const Patch& patch2);
 
 #endif

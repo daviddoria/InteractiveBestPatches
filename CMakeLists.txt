@@ -21,17 +21,23 @@ INCLUDE(${VTK_USE_FILE})
 FIND_PACKAGE(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
 
+add_library(BestPatches
+Helpers.cpp
+Patch.cpp
+SelfPatchCompare.cpp)
+
 ADD_EXECUTABLE(InteractiveBestPatches
 ClickableLabel.cpp
 CustomImageStyle.cxx
 CustomTrackballStyle.cxx
 Form.cxx 
-Helpers.cpp 
 InteractiveBestPatches.cpp 
 #MyGraphicsItem.cpp
-Patch.cpp
 SwitchBetweenStyle.cxx
-SelfPatchCompare.cpp
 ${UISrcs} ${MOCSrcs})
-TARGET_LINK_LIBRARIES(InteractiveBestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(InteractiveBestPatches BestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES})
 INSTALL( TARGETS InteractiveBestPatches RUNTIME DESTINATION ${INSTALL_DIR} )
+
+
+ADD_EXECUTABLE(ExamplePatchDifference ExamplePatchDifference.cpp)
+TARGET_LINK_LIBRARIES(ExamplePatchDifference BestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES})
