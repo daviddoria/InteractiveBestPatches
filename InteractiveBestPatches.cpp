@@ -19,7 +19,7 @@
 #include <QApplication>
 #include <QCleanlooksStyle>
 
-#include "Form.h"
+#include "InteractiveBestPatchesWidget.h"
 
 int main( int argc, char** argv )
 {
@@ -27,8 +27,16 @@ int main( int argc, char** argv )
 
   QApplication::setStyle(new QCleanlooksStyle);
 
-  Form myForm;
-  myForm.show();
+  InteractiveBestPatchesWidget* interactiveBestPatchesWidget;
+  if(argc == 1)
+  {
+    interactiveBestPatchesWidget = new InteractiveBestPatchesWidget;
+  }
+  else
+  {
+    interactiveBestPatchesWidget = new InteractiveBestPatchesWidget(argv[1], argv[2]);
+  }
+  interactiveBestPatchesWidget->show();
 
   return app.exec();
 }

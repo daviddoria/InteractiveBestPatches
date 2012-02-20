@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QMainWindow" name="Form">
+ <class>InteractiveBestPatchesWidget</class>
+ <widget class="QMainWindow" name="InteractiveBestPatchesWidget">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -121,7 +121,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QVTKWidget" name="qvtkWidget" native="true"/>
+       <widget class="QVTKWidget" name="qvtkWidget"/>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0,5,0">
@@ -254,7 +254,7 @@
      <x>0</x>
      <y>0</y>
      <width>1374</width>
-     <height>33</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLeft_Pane">

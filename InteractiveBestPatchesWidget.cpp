@@ -17,7 +17,7 @@
  *=========================================================================*/
 
 #include "ui_Form.h"
-#include "Form.h"
+#include "InteractiveBestPatchesWidget.h"
 
 // ITK
 #include "itkCastImageFilter.h"
@@ -66,23 +66,35 @@
 //#include "MyGraphicsItem.h"
 #include "Types.h"
 
-const unsigned char Form::Green[3] = {0,255,0};
-const unsigned char Form::Red[3] = {255,0,0};
+const unsigned char InteractiveBestPatchesWidget::Green[3] = {0,255,0};
+const unsigned char InteractiveBestPatchesWidget::Red[3] = {255,0,0};
 
-void Form::on_actionHelp_activated()
+void InteractiveBestPatchesWidget::on_actionHelp_activated()
 {
   QTextEdit* help=new QTextEdit();
   
   help->setReadOnly(true);
   help->append("<h1>Interactive Patch Comparison</h1>\
   Position the two patches. <br/>\
-  Their difference will be displayed.<br/> <p/>"\
+  Their difference will be displayed.<br/> <p/>"
   );
   help->show();
 }
 
+InteractiveBestPatchesWidget::InteractiveBestPatchesWidget(const std::string& imageFileName, const std::string& maskFileName)
+{
+  SharedConstructor();
+  LoadImage(imageFileName);
+  LoadMask(maskFileName);
+}
+
 // Constructor
-Form::Form()
+InteractiveBestPatchesWidget::InteractiveBestPatchesWidget()
+{
+  SharedConstructor();
+}
+
+void InteractiveBestPatchesWidget::SharedConstructor()
 {
   this->setupUi(this);
   
@@ -164,12 +176,13 @@ Form::Form()
   this->Image = NULL;
   this->MaskImage = NULL;
   
-  this->InteractorStyle->TrackballStyle->AddObserver(CustomTrackballStyle::PatchesMovedEvent, this, &Form::PatchesMoved);
+  this->InteractorStyle->TrackballStyle->AddObserver(CustomTrackballStyle::PatchesMovedEvent,
+                                                     this, &InteractiveBestPatchesWidget::PatchesMoved);
   
   this->tableWidget->resizeColumnsToContents();
 };
 
-void Form::on_btnResort_clicked()
+void InteractiveBestPatchesWidget::on_btnResort_clicked()
 {
   if(this->radTotalAbsolute->isChecked())
     {
@@ -191,15 +204,55 @@ void Form::on_btnResort_clicked()
   DisplaySourcePatches();
 }
 
-void Form::on_actionQuit_activated()
+void InteractiveBestPatchesWidget::on_actionQuit_activated()
 {
   exit(0);
 }
 
-void Form::on_actionOpenImage_activated()
+void InteractiveBestPatchesWidget::LoadImage(const std::string& fileName)
+{
+  // Set the working directory
+  QFileInfo fileInfo(fileName.c_str());
+  std::string workingDirectory = fileInfo.absoluteDir().absolutePath().toStdString() + "/";
+  std::cout << "Working directory set to: " << workingDirectory << std::endl;
+  QDir::setCurrent(QString(workingDirectory.c_str()));
+
+  typedef itk::ImageFileReader<FloatVectorImageType> ReaderType;
+  ReaderType::Pointer reader = ReaderType::New();
+  reader->SetFileName(fileName);
+  reader->Update();
+
+  //this->Image = reader->GetOutput();
+  this->Image = FloatVectorImageType::New();
+  Helpers::DeepCopyVectorImage<FloatVectorImageType>(reader->GetOutput(), this->Image);
+
+  Helpers::ITKImagetoVTKImage(this->Image, this->VTKImage);
+
+  this->statusBar()->showMessage("Opened image.");
+  actionOpenMask->setEnabled(true);
+
+  GetPatchSize();
+
+  // Initialize
+  this->SourcePatchSlice->SetPosition(-1.*static_cast<float>(this->PatchSize[0]), -1.*static_cast<float>(this->PatchSize[0]), 0); // Have to cast these because a negative unsigned int is undefined
+
+  this->TargetPatchSlice->SetPosition(this->Image->GetLargestPossibleRegion().GetSize()[0]/2 + this->PatchSize[0],
+                                      this->Image->GetLargestPossibleRegion().GetSize()[1]/2, 0);
+
+  SetupPatches();
+
+  PatchesMoved();
+
+  this->Renderer->ResetCamera();
+
+  Refresh();
+}
+
+void InteractiveBestPatchesWidget::on_actionOpenImage_activated()
 {
   // Get a filename to open
-  QString fileName = QFileDialog::getOpenFileName(this, "Open File", ".", "Image Files (*.jpg *.jpeg *.bmp *.png *.mha);;PNG Files (*.png)");
+  QString fileName = QFileDialog::getOpenFileName(this, "Open File", ".",
+                                                  "Image Files (*.jpg *.jpeg *.bmp *.png *.mha);;PNG Files (*.png)");
 
   std::cout << "Got filename: " << fileName.toStdString() << std::endl;
   if(fileName.toStdString().empty())
@@ -208,49 +261,15 @@ void Form::on_actionOpenImage_activated()
     return;
     }
 
-  // Set the working directory
-  QFileInfo fileInfo(fileName);
-  std::string workingDirectory = fileInfo.absoluteDir().absolutePath().toStdString() + "/";
-  std::cout << "Working directory set to: " << workingDirectory << std::endl;
-  QDir::setCurrent(QString(workingDirectory.c_str()));
-    
-  typedef itk::ImageFileReader<FloatVectorImageType> ReaderType;
-  ReaderType::Pointer reader = ReaderType::New();
-  reader->SetFileName(fileName.toStdString());
-  reader->Update();
-
-  //this->Image = reader->GetOutput();
-  this->Image = FloatVectorImageType::New();
-  Helpers::DeepCopyVectorImage<FloatVectorImageType>(reader->GetOutput(), this->Image);
-  
-  Helpers::ITKImagetoVTKImage(this->Image, this->VTKImage);
-  
-  this->statusBar()->showMessage("Opened image.");
-  actionOpenMask->setEnabled(true);
-  
-  GetPatchSize();
-  
-  // Initialize
-  this->SourcePatchSlice->SetPosition(-1.*static_cast<float>(this->PatchSize[0]), -1.*static_cast<float>(this->PatchSize[0]), 0); // Have to cast these because a negative unsigned int is undefined
-  
-  this->TargetPatchSlice->SetPosition(this->Image->GetLargestPossibleRegion().GetSize()[0]/2 + this->PatchSize[0], this->Image->GetLargestPossibleRegion().GetSize()[1]/2, 0);
-  
-  SetupPatches();
-  
-  PatchesMoved();
-  
-  this->Renderer->ResetCamera();
-  
-  Refresh();
-  
+  LoadImage(fileName.toStdString());
 }
 
-void Form::on_txtPatchRadius_returnPressed()
+void InteractiveBestPatchesWidget::on_txtPatchRadius_returnPressed()
 {
   SetupPatches();
 }
 
-void Form::PositionTarget()
+void InteractiveBestPatchesWidget::PositionTarget()
 {
   double position[3];
   this->TargetPatchSlice->GetPosition(position);
@@ -261,24 +280,24 @@ void Form::PositionTarget()
   PatchesMoved();
 }
 
-void Form::on_txtTargetX_returnPressed()
+void InteractiveBestPatchesWidget::on_txtTargetX_returnPressed()
 {
   PositionTarget();  
 }
 
-void Form::on_txtTargetY_returnPressed()
+void InteractiveBestPatchesWidget::on_txtTargetY_returnPressed()
 {
   PositionTarget();
 }
 
-void Form::GetPatchSize()
+void InteractiveBestPatchesWidget::GetPatchSize()
 {
   // The edge length of the patch is the (radius*2) + 1
   this->PatchSize[0] = this->txtPatchRadius->text().toUInt() * 2 + 1;
   this->PatchSize[1] = this->txtPatchRadius->text().toUInt() * 2 + 1;
 }
 
-void Form::SetupPatches()
+void InteractiveBestPatchesWidget::SetupPatches()
 {
   GetPatchSize();
 
@@ -290,7 +309,7 @@ void Form::SetupPatches()
   Refresh();
 }
 
-void Form::InitializePatch(vtkImageData* image, const unsigned char color[3])
+void InteractiveBestPatchesWidget::InitializePatch(vtkImageData* image, const unsigned char color[3])
 {
   // Setup and allocate the image data
   image->SetNumberOfScalarComponents(4);
@@ -301,7 +320,7 @@ void Form::InitializePatch(vtkImageData* image, const unsigned char color[3])
   Helpers::BlankAndOutlineImage(image,color);
 }
 
-void Form::on_actionOpenMaskInverted_activated()
+void InteractiveBestPatchesWidget::on_actionOpenMaskInverted_activated()
 {
   std::cout << "on_actionOpenMaskInverted_activated()" << std::endl;
   on_actionOpenMask_activated();
@@ -309,7 +328,35 @@ void Form::on_actionOpenMaskInverted_activated()
   this->MaskImage->Cleanup();
   }
 
-void Form::on_actionOpenMask_activated()
+void InteractiveBestPatchesWidget::LoadMask(const std::string& fileName)
+{
+
+  typedef itk::ImageFileReader<Mask> ReaderType;
+  ReaderType::Pointer reader = ReaderType::New();
+  reader->SetFileName(fileName);
+  reader->Update();
+
+  if(this->Image->GetLargestPossibleRegion() != reader->GetOutput()->GetLargestPossibleRegion())
+    {
+    std::cerr << "Image and mask must be the same size!" << std::endl;
+    return;
+    }
+  this->MaskImage = Mask::New();
+  Helpers::DeepCopy<Mask>(reader->GetOutput(), this->MaskImage);
+
+  // For this program, we ALWAYS assume the hole to be filled is white, and the valid/source region is black.
+  // This is not simply reversible because of some subtle erosion operations that are performed.
+  // For this reason, we provide an "load inverted mask" action in the file menu.
+  this->MaskImage->SetValidValue(0);
+  this->MaskImage->SetHoleValue(255);
+
+  this->MaskImage->Cleanup();
+
+  Helpers::SetMaskTransparency(this->MaskImage, this->VTKMaskImage);
+
+}
+
+void InteractiveBestPatchesWidget::on_actionOpenMask_activated()
 {
   // Get a filename to open
   QString fileName = QFileDialog::getOpenFileName(this, "Open File", ".", "Image Files (*.png *.bmp);;Image Files (*.mha)");
@@ -321,38 +368,17 @@ void Form::on_actionOpenMask_activated()
     return;
     }
 
-  typedef itk::ImageFileReader<Mask> ReaderType;
-  ReaderType::Pointer reader = ReaderType::New();
-  reader->SetFileName(fileName.toStdString());
-  reader->Update();
-  
-  if(this->Image->GetLargestPossibleRegion() != reader->GetOutput()->GetLargestPossibleRegion())
-    {
-    std::cerr << "Image and mask must be the same size!" << std::endl;
-    return;
-    }
-  this->MaskImage = Mask::New();
-  Helpers::DeepCopy<Mask>(reader->GetOutput(), this->MaskImage);
-  
-  // For this program, we ALWAYS assume the hole to be filled is white, and the valid/source region is black.
-  // This is not simply reversible because of some subtle erosion operations that are performed.
-  // For this reason, we provide an "load inverted mask" action in the file menu.
-  this->MaskImage->SetValidValue(0);
-  this->MaskImage->SetHoleValue(255);
-  
-  this->MaskImage->Cleanup();
-  
-  Helpers::SetMaskTransparency(this->MaskImage, this->VTKMaskImage);
+  LoadMask(fileName.toStdString());
 
   this->statusBar()->showMessage("Opened mask.");
 }
 
-void Form::RefreshSlot()
+void InteractiveBestPatchesWidget::RefreshSlot()
 {
   Refresh();
 }
 
-void Form::Refresh()
+void InteractiveBestPatchesWidget::Refresh()
 {
   //std::cout << "Refresh()" << std::endl;
   
@@ -362,14 +388,14 @@ void Form::Refresh()
   
 }
 
-void Form::SetCameraPosition1()
+void InteractiveBestPatchesWidget::SetCameraPosition1()
 {
   double leftToRight[3] = {-1,0,0};
   double bottomToTop[3] = {0,1,0};
   SetCameraPosition(leftToRight, bottomToTop);
 }
 
-void Form::SetCameraPosition2()
+void InteractiveBestPatchesWidget::SetCameraPosition2()
 {
   double leftToRight[3] = {-1,0,0};
   double bottomToTop[3] = {0,-1,0};
@@ -377,7 +403,7 @@ void Form::SetCameraPosition2()
   SetCameraPosition(leftToRight, bottomToTop);
 }
 
-void Form::SetCameraPosition(const double leftToRight[3], const double bottomToTop[3])
+void InteractiveBestPatchesWidget::SetCameraPosition(const double leftToRight[3], const double bottomToTop[3])
 {
   this->InteractorStyle->SetImageOrientation(leftToRight, bottomToTop);
 
@@ -387,7 +413,7 @@ void Form::SetCameraPosition(const double leftToRight[3], const double bottomToT
 }
 
 
-void Form::on_actionFlipImage_activated()
+void InteractiveBestPatchesWidget::on_actionFlipImage_activated()
 {
   if(this->Flipped)
     {
@@ -400,7 +426,7 @@ void Form::on_actionFlipImage_activated()
   this->Flipped = !this->Flipped;
 }
 
-void Form::PatchesMoved()
+void InteractiveBestPatchesWidget::PatchesMoved()
 {
   //std::cout << "Patches moved." << std::endl;
 
@@ -430,7 +456,7 @@ void Form::PatchesMoved()
 
 }
 
-QImage Form::GetQImage(const itk::ImageRegion<2>& region)
+QImage InteractiveBestPatchesWidget::GetQImage(const itk::ImageRegion<2>& region)
 {
   
   QImage qimage(region.GetSize()[0], region.GetSize()[1], QImage::Format_RGB888); // Should probably be Format_RGB888
@@ -455,7 +481,7 @@ QImage Form::GetQImage(const itk::ImageRegion<2>& region)
   return qimage.mirrored(false, true).scaledToHeight(DisplayPatchSize); // The flipped image region forced to 50x50 (because our patches are always square
 }
 
-QImage Form::GetTargetQImage(const itk::ImageRegion<2>& region)
+QImage InteractiveBestPatchesWidget::GetTargetQImage(const itk::ImageRegion<2>& region)
 {
   
   QImage qimage(region.GetSize()[0], region.GetSize()[1], QImage::Format_RGB888); // Should probably be Format_RGB888
@@ -488,7 +514,7 @@ QImage Form::GetTargetQImage(const itk::ImageRegion<2>& region)
   return qimage.mirrored(false, true).scaledToHeight(DisplayPatchSize); // The flipped image region forced to 50x50 (because our patches are always square
 }
 
-void Form::SetMaskedPixelsToGreen(const itk::ImageRegion<2>& targetRegion, vtkImageData* image)
+void InteractiveBestPatchesWidget::SetMaskedPixelsToGreen(const itk::ImageRegion<2>& targetRegion, vtkImageData* image)
 {
   itk::ImageRegionIterator<Mask> maskIterator(this->MaskImage, targetRegion);
 
@@ -508,13 +534,13 @@ void Form::SetMaskedPixelsToGreen(const itk::ImageRegion<2>& targetRegion, vtkIm
     }  
 }
 
-void Form::on_txtNumberOfPatches_returnPressed()
+void InteractiveBestPatchesWidget::on_txtNumberOfPatches_returnPressed()
 {
   DisplaySourcePatches();
   Refresh();
 }
 
-void Form::DisplaySourcePatches()
+void InteractiveBestPatchesWidget::DisplaySourcePatches()
 {
   
   unsigned int numberOfPatches = this->txtNumberOfPatches->text().toUInt();
@@ -578,7 +604,7 @@ void Form::DisplaySourcePatches()
   
 }
 
-void Form::on_btnCompute_clicked()
+void InteractiveBestPatchesWidget::on_btnCompute_clicked()
 {
   PositionTarget();
   
@@ -590,7 +616,8 @@ void Form::on_btnCompute_clicked()
   // This checks to see if both the image and mask have been set to something non-NULL
   if(!this->PatchCompare.IsReady())
     {
-    std::cout << "Not ready to compute! Image, MaskImage or NumberOfComponentsPerPixel may not be set on the PatchCompare object!" << std::endl;
+    std::cout << "Not ready to compute! Image, MaskImage or NumberOfComponentsPerPixel\
+                  may not be set on the PatchCompare object!" << std::endl;
     return;
     }
 
@@ -602,7 +629,7 @@ void Form::on_btnCompute_clicked()
   PatchClickedSlot(0);
 }
 
-itk::ImageRegion<2> Form::GetTargetRegion()
+itk::ImageRegion<2> InteractiveBestPatchesWidget::GetTargetRegion()
 {
   double targetPosition[3];
   this->TargetPatchSlice->GetPosition(targetPosition);
@@ -615,12 +642,12 @@ itk::ImageRegion<2> Form::GetTargetRegion()
   return region;
 }
 
-void Form::on_chkFillPatch_clicked()
+void InteractiveBestPatchesWidget::on_chkFillPatch_clicked()
 {
   PatchClickedSlot(this->DisplayedSourcePatch);
 }
 
-void Form::PatchClickedSlot(const unsigned int value)
+void InteractiveBestPatchesWidget::PatchClickedSlot(const unsigned int value)
 {
   // 'value' here is the "ith best match". E.g. the third best match would have value=2.
   this->DisplayedSourcePatch = value;
@@ -647,7 +674,7 @@ void Form::PatchClickedSlot(const unsigned int value)
   Refresh();
 }
 
-void Form::on_chkShowMask_clicked()
+void InteractiveBestPatchesWidget::on_chkShowMask_clicked()
 {
   Refresh();
 }

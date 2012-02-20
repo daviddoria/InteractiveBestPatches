@@ -16,10 +16,10 @@
  *
  *=========================================================================*/
 
-#ifndef FORM_H
-#define FORM_H
+#ifndef InteractiveBestPatchesWidget_H
+#define InteractiveBestPatchesWidget_H
 
-#include "ui_Form.h"
+#include "ui_InteractiveBestPatchesWidget.h"
 
 // VTK
 #include <vtkSmartPointer.h>
@@ -42,14 +42,16 @@ class vtkImageSliceMapper;
 
 class SwitchBetweenStyle;
 
-class Form : public QMainWindow, public Ui::Form
+class InteractiveBestPatchesWidget : public QMainWindow, public Ui::InteractiveBestPatchesWidget
 {
   Q_OBJECT
 public:
 
   // Constructor/Destructor
-  Form();
-  ~Form() {};
+  InteractiveBestPatchesWidget();
+  InteractiveBestPatchesWidget(const std::string& imageFileName, const std::string& maskFileName);
+  void SharedConstructor();
+  ~InteractiveBestPatchesWidget() {};
   
   // These function deal with flipping the image
   void SetCameraPosition(const double leftToRight[3], const double bottomToTop[3]);
@@ -99,6 +101,9 @@ protected:
   QImage GetTargetQImage(const itk::ImageRegion<2>& region);
   
   void SetMaskedPixelsToGreen(const itk::ImageRegion<2>& targetRegion, vtkImageData* image);
+
+  void LoadMask(const std::string& filename);
+  void LoadImage(const std::string& filename);
   
   static const unsigned char Green[3];
   static const unsigned char Red[3];
@@ -155,4 +160,4 @@ protected:
   unsigned int DisplayedSourcePatch;
 };
 
-#endif // Form_H
+#endif // InteractiveBestPatchesWidget_H

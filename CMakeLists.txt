@@ -10,8 +10,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
-QT4_WRAP_UI(UISrcs Form.ui)
-QT4_WRAP_CPP(MOCSrcs Form.h 
+QT4_WRAP_UI(UISrcs InteractiveBestPatchesWidget.ui)
+QT4_WRAP_CPP(MOCSrcs InteractiveBestPatchesWidget.h
 #MyGraphicsItem.h
 ClickableLabel.h)
 
@@ -30,7 +30,7 @@ ADD_EXECUTABLE(InteractiveBestPatches
 ClickableLabel.cpp
 CustomImageStyle.cxx
 CustomTrackballStyle.cxx
-Form.cxx 
+InteractiveBestPatchesWidget.cpp
 InteractiveBestPatches.cpp 
 #MyGraphicsItem.cpp
 SwitchBetweenStyle.cxx
