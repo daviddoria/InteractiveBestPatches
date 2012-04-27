@@ -27,10 +27,12 @@
  */
 
 // Custom
-#include "Helpers.h"
-#include "Mask.h"
+#include "Mask/Mask.h"
 #include "Patch.h"
 #include "Types.h"
+
+// Submodules
+#include "Helpers/Helpers.h"
 
 // ITK
 #include "itkImageRegion.h"
@@ -82,7 +84,8 @@ public:
 protected:
   // If a channel of one pixel was white (255) and the corresponding channel of the other pixel
   // was black (0), the difference would be 255, so the difference squared would be 255*255
-  static const float MaxColorDifference = 255*255;
+  //static const float MaxColorDifference = 255*255; // Doesn't work with c++0x
+  static float MaxColorDifference() { return 255.0f*255.0f; }
   
   // These are the offsets of the target region which we with to compare
   //std::vector<FloatVectorImageType::OffsetValueType> ValidOffsets;

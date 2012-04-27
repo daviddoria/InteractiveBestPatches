@@ -18,7 +18,11 @@
 
 #include "SelfPatchCompare.h"
 
-#include "Helpers.h"
+// Submodules
+#include "Helpers/Helpers.h"
+#include "ITKHelpers/ITKHelpers.h"
+
+// Custom
 #include "Patch.h"
 #include "Types.h"
 
@@ -41,7 +45,7 @@ void SelfPatchCompare::ComputeSourcePatches()
   while(!imageIterator.IsAtEnd())
     {
     itk::Index<2> currentPixel = imageIterator.GetIndex();
-    itk::ImageRegion<2> region = Helpers::GetRegionInRadiusAroundPixel(currentPixel, this->TargetRegion.GetSize()[0]/2);
+    itk::ImageRegion<2> region = ITKHelpers::GetRegionInRadiusAroundPixel(currentPixel, this->TargetRegion.GetSize()[0]/2);
   
     if(this->MaskImage->GetLargestPossibleRegion().IsInside(region))
       {

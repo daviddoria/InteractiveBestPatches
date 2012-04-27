@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
+
 PROJECT(InteractiveBestPatches)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
 
 # Where to copy executables when 'make install' is run
 SET(INSTALL_DIR ${CMAKE_INSTALL_PREFIX} )
@@ -9,6 +12,12 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
+
+add_subdirectory(Helpers)
+add_subdirectory(ITKHelpers)
+add_subdirectory(VTKHelpers)
+add_subdirectory(ITKVTKHelpers)
+add_subdirectory(Mask)
 
 QT4_WRAP_UI(UISrcs InteractiveBestPatchesWidget.ui)
 QT4_WRAP_CPP(MOCSrcs InteractiveBestPatchesWidget.h
@@ -22,9 +31,9 @@ FIND_PACKAGE(ITK REQUIRED)
 INCLUDE(${ITK_USE_FILE})
 
 add_library(BestPatches
-Helpers.cpp
 Patch.cpp
 SelfPatchCompare.cpp)
+TARGET_LINK_LIBRARIES(BestPatches libITKHelpers libVTKHelpers libMask libITKVTKHelpers)
 
 ADD_EXECUTABLE(InteractiveBestPatches
 ClickableLabel.cpp
@@ -35,7 +44,8 @@ InteractiveBestPatches.cpp
 #MyGraphicsItem.cpp
 SwitchBetweenStyle.cxx
 ${UISrcs} ${MOCSrcs})
-TARGET_LINK_LIBRARIES(InteractiveBestPatches BestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(InteractiveBestPatches BestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES}
+libHelpers libITKHelpers libMask libITKVTKHelpers libVTKHelpers )
 INSTALL( TARGETS InteractiveBestPatches RUNTIME DESTINATION ${INSTALL_DIR} )
 
 

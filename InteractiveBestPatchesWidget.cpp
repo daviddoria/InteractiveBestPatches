@@ -61,11 +61,16 @@
 
 // Custom
 #include "ClickableLabel.h"
-#include "Helpers.h"
-#include "Mask.h"
 #include "SwitchBetweenStyle.h"
 //#include "MyGraphicsItem.h"
 #include "Types.h"
+
+// Submodules
+#include "Helpers/Helpers.h"
+#include "ITKHelpers/ITKHelpers.h"
+#include "VTKHelpers/VTKHelpers.h"
+#include "ITKVTKHelpers/ITKVTKHelpers.h"
+#include "Mask/MaskOperations.h"
 
 const unsigned char InteractiveBestPatchesWidget::Green[3] = {0,255,0};
 const unsigned char InteractiveBestPatchesWidget::Red[3] = {255,0,0};
@@ -225,9 +230,9 @@ void InteractiveBestPatchesWidget::LoadImage(const std::string& fileName)
 
   //this->Image = reader->GetOutput();
   this->Image = FloatVectorImageType::New();
-  Helpers::DeepCopyVectorImage<FloatVectorImageType>(reader->GetOutput(), this->Image);
+  ITKHelpers::DeepCopy(reader->GetOutput(), this->Image.GetPointer());
 
-  Helpers::ITKImagetoVTKImage(this->Image, this->VTKImage);
+  ITKVTKHelpers::ITKVectorImageToVTKImageFromDimension(this->Image, this->VTKImage);
 
   this->statusBar()->showMessage("Opened image.");
   actionOpenMask->setEnabled(true);
@@ -316,7 +321,7 @@ void InteractiveBestPatchesWidget::InitializePatch(vtkImageData* image, const un
   image->SetDimensions(this->PatchSize[0], this->PatchSize[1], 1);
   image->AllocateScalars(VTK_UNSIGNED_CHAR, 4);
   
-  Helpers::BlankAndOutlineImage(image,color);
+  VTKHelpers::BlankAndOutlineImage(image,color);
 }
 
 void InteractiveBestPatchesWidget::on_actionOpenMaskInverted_activated()
@@ -341,7 +346,7 @@ void InteractiveBestPatchesWidget::LoadMask(const std::string& fileName)
     return;
     }
   this->MaskImage = Mask::New();
-  Helpers::DeepCopy<Mask>(reader->GetOutput(), this->MaskImage);
+  ITKHelpers::DeepCopy(reader->GetOutput(), this->MaskImage.GetPointer());
 
   // For this program, we ALWAYS assume the hole to be filled is white, and the valid/source region is black.
   // This is not simply reversible because of some subtle erosion operations that are performed.
@@ -351,7 +356,7 @@ void InteractiveBestPatchesWidget::LoadMask(const std::string& fileName)
 
   this->MaskImage->Cleanup();
 
-  Helpers::SetMaskTransparency(this->MaskImage, this->VTKMaskImage);
+  MaskOperations::SetMaskTransparency(this->MaskImage, this->VTKMaskImage);
 
 }
 
@@ -662,12 +667,12 @@ void InteractiveBestPatchesWidget::PatchClickedSlot(const unsigned int value)
 
   if(this->chkFillPatch->isChecked())
     {
-    Helpers::ITKRegionToVTKImage(this->Image, patch.Region, this->TargetPatch);
-    Helpers::OutlineImage(this->TargetPatch, this->Red);
+    ITKVTKHelpers::CreatePatchVTKImage(this->Image.GetPointer(), patch.Region, this->TargetPatch);
+    VTKHelpers::OutlineImage(this->TargetPatch, this->Red);
     }
   else
     {
-    Helpers::BlankAndOutlineImage(this->TargetPatch, this->Red);
+    VTKHelpers::BlankAndOutlineImage(this->TargetPatch, this->Red);
     }
 
   Refresh();

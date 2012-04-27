@@ -36,9 +36,11 @@ class vtkImageSliceMapper;
 #include <QImage>
 
 // Custom
-#include "Mask.h"
 #include "Types.h"
 #include "SelfPatchCompare.h"
+
+// Submodules
+#include "Mask/Mask.h"
 
 class SwitchBetweenStyle;
 
