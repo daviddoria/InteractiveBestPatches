@@ -16,7 +16,8 @@
  *
  *=========================================================================*/
 
-#include "ui_Form.h"
+// #include "ui_InteractiveBestPatchesWidget.h"
+
 #include "InteractiveBestPatchesWidget.h"
 
 // ITK
@@ -128,7 +129,7 @@ void InteractiveBestPatchesWidget::SharedConstructor()
   this->ImageSliceMapper = vtkSmartPointer<vtkImageSliceMapper>::New();
   this->ImageSliceMapper->BorderOn();
   this->ImageSlice->PickableOff();
-  this->ImageSliceMapper->SetInputConnection(this->VTKImage->GetProducerPort());
+  this->ImageSliceMapper->SetInputData(this->VTKImage);
   this->ImageSlice->SetMapper(this->ImageSliceMapper);
   this->ImageSlice->GetProperty()->SetInterpolationTypeToNearest();
   
@@ -138,7 +139,7 @@ void InteractiveBestPatchesWidget::SharedConstructor()
   this->MaskImageSliceMapper = vtkSmartPointer<vtkImageSliceMapper>::New();
   this->MaskImageSlice->PickableOff();
   this->MaskImageSliceMapper->BorderOn();
-  this->MaskImageSliceMapper->SetInputConnection(this->VTKMaskImage->GetProducerPort());
+  this->MaskImageSliceMapper->SetInputData(this->VTKMaskImage);
   this->MaskImageSlice->SetMapper(this->MaskImageSliceMapper);
   this->MaskImageSlice->GetProperty()->SetInterpolationTypeToNearest();
   
@@ -148,7 +149,7 @@ void InteractiveBestPatchesWidget::SharedConstructor()
   this->SourcePatchSlice->PickableOff();
   this->SourcePatchSliceMapper = vtkSmartPointer<vtkImageSliceMapper>::New();
   this->SourcePatchSliceMapper->BorderOn();
-  this->SourcePatchSliceMapper->SetInputConnection(this->SourcePatch->GetProducerPort());
+  this->SourcePatchSliceMapper->SetInputData(this->SourcePatch);
   this->SourcePatchSlice->SetMapper(this->SourcePatchSliceMapper);
   this->SourcePatchSlice->GetProperty()->SetInterpolationTypeToNearest();
   
@@ -156,7 +157,7 @@ void InteractiveBestPatchesWidget::SharedConstructor()
   this->TargetPatchSlice = vtkSmartPointer<vtkImageSlice>::New();
   this->TargetPatchSliceMapper = vtkSmartPointer<vtkImageSliceMapper>::New();
   this->TargetPatchSliceMapper->BorderOn();
-  this->TargetPatchSliceMapper->SetInputConnection(this->TargetPatch->GetProducerPort());
+  this->TargetPatchSliceMapper->SetInputData(this->TargetPatch);
   this->TargetPatchSlice->SetMapper(this->TargetPatchSliceMapper);
   this->TargetPatchSlice->GetProperty()->SetInterpolationTypeToNearest();
   
@@ -233,8 +234,8 @@ void InteractiveBestPatchesWidget::LoadImage(const std::string& fileName)
 
   GetPatchSize();
 
-  // Initialize
-  this->SourcePatchSlice->SetPosition(-1.*static_cast<float>(this->PatchSize[0]), -1.*static_cast<float>(this->PatchSize[0]), 0); // Have to cast these because a negative unsigned int is undefined
+  // Initialize (Have to cast these because a negative unsigned int is undefined)
+  this->SourcePatchSlice->SetPosition(-1.*static_cast<float>(this->PatchSize[0]), -1.*static_cast<float>(this->PatchSize[0]), 0); 
 
   this->TargetPatchSlice->SetPosition(this->Image->GetLargestPossibleRegion().GetSize()[0]/2 + this->PatchSize[0],
                                       this->Image->GetLargestPossibleRegion().GetSize()[1]/2, 0);
@@ -312,10 +313,8 @@ void InteractiveBestPatchesWidget::SetupPatches()
 void InteractiveBestPatchesWidget::InitializePatch(vtkImageData* image, const unsigned char color[3])
 {
   // Setup and allocate the image data
-  image->SetNumberOfScalarComponents(4);
-  image->SetScalarTypeToUnsignedChar();
   image->SetDimensions(this->PatchSize[0], this->PatchSize[1], 1);
-  image->AllocateScalars();
+  image->AllocateScalars(VTK_UNSIGNED_CHAR, 4);
   
   Helpers::BlankAndOutlineImage(image,color);
 }

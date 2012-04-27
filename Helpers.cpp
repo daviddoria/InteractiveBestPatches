@@ -108,13 +108,11 @@ itk::Index<2> GetIndexFromImageSlice(vtkImageSlice* slice)
 void ITKRegionToVTKImage(FloatVectorImageType::Pointer image, const itk::ImageRegion<2>& region, vtkImageData* outputImage)
 {
   // Setup and allocate the VTK image
-  outputImage->SetNumberOfScalarComponents(3);
-  outputImage->SetScalarTypeToUnsignedChar();
   outputImage->SetDimensions(region.GetSize()[0],
                              region.GetSize()[1],
                              1);
 
-  outputImage->AllocateScalars();
+  outputImage->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
 
   // Copy all of the pixels to the output
   itk::ImageRegionConstIteratorWithIndex<FloatVectorImageType> imageIterator(image, region);
@@ -141,13 +139,11 @@ void ITKRegionToVTKImage(FloatVectorImageType::Pointer image, const itk::ImageRe
 void SetMaskTransparencyBinary(Mask::Pointer input, vtkImageData* outputImage)
 {
   // Setup and allocate the VTK image
-  outputImage->SetNumberOfScalarComponents(2);
-  outputImage->SetScalarTypeToUnsignedChar();
   outputImage->SetDimensions(input->GetLargestPossibleRegion().GetSize()[0],
                              input->GetLargestPossibleRegion().GetSize()[1],
                              1);
 
-  outputImage->AllocateScalars();
+  outputImage->AllocateScalars(VTK_UNSIGNED_CHAR, 2);
 
   // Copy all of the pixels to the output
   itk::ImageRegionConstIteratorWithIndex<UnsignedCharScalarImageType> imageIterator(input, input->GetLargestPossibleRegion());
@@ -177,13 +173,11 @@ void SetMaskTransparencyBinary(Mask::Pointer input, vtkImageData* outputImage)
 void SetMaskTransparency(Mask::Pointer input, vtkImageData* outputImage)
 {
   // Setup and allocate the VTK image
-  outputImage->SetNumberOfScalarComponents(4);
-  outputImage->SetScalarTypeToUnsignedChar();
   outputImage->SetDimensions(input->GetLargestPossibleRegion().GetSize()[0],
                              input->GetLargestPossibleRegion().GetSize()[1],
                              1);
 
-  outputImage->AllocateScalars();
+  outputImage->AllocateScalars(VTK_UNSIGNED_CHAR, 4);
 
   // Copy all of the pixels to the output
   itk::ImageRegionConstIteratorWithIndex<UnsignedCharScalarImageType> imageIterator(input, input->GetLargestPossibleRegion());
@@ -306,13 +300,11 @@ void ITKImagetoVTKVectorFieldImage(FloatVector2ImageType::Pointer image, vtkImag
   //std::cout << "ITKImagetoVTKVectorFieldImage()" << std::endl;
 
   // Setup and allocate the image data
-  outputImage->SetNumberOfScalarComponents(3); // We really want this to be 2, but VTK complains, so we must add a 3rd component (0) to every pixel
-  outputImage->SetScalarTypeToFloat();
   outputImage->SetDimensions(image->GetLargestPossibleRegion().GetSize()[0],
                              image->GetLargestPossibleRegion().GetSize()[1],
                              1);
 
-  outputImage->AllocateScalars();
+  outputImage->AllocateScalars(VTK_FLOAT, 3);  // We really want this to be 2, but VTK complains, so we must add a 3rd component (0) to every pixel
 
   // Copy all of the input image pixels to the output image
   itk::ImageRegionConstIteratorWithIndex<FloatVector2ImageType> imageIterator(image, image->GetLargestPossibleRegion());
@@ -347,13 +339,11 @@ void ITKImagetoVTKRGBImage(FloatVectorImageType::Pointer image, vtkImageData* ou
     }
 
   // Setup and allocate the image data
-  outputImage->SetNumberOfScalarComponents(3);
-  outputImage->SetScalarTypeToUnsignedChar();
   outputImage->SetDimensions(image->GetLargestPossibleRegion().GetSize()[0],
                              image->GetLargestPossibleRegion().GetSize()[1],
                              1);
 
-  outputImage->AllocateScalars();
+  outputImage->AllocateScalars(VTK_UNSIGNED_CHAR, 3);
 
   // Copy all of the input image pixels to the output image
   itk::ImageRegionConstIteratorWithIndex<FloatVectorImageType> imageIterator(image,image->GetLargestPossibleRegion());
@@ -399,13 +389,11 @@ void ITKImagetoVTKMagnitudeImage(FloatVectorImageType::Pointer image, vtkImageDa
   rescaleFilter->Update();
 
   // Setup and allocate the VTK image
-  outputImage->SetNumberOfScalarComponents(1);
-  outputImage->SetScalarTypeToUnsignedChar();
   outputImage->SetDimensions(image->GetLargestPossibleRegion().GetSize()[0],
                              image->GetLargestPossibleRegion().GetSize()[1],
                              1);
 
-  outputImage->AllocateScalars();
+  outputImage->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
 
   // Copy all of the scaled magnitudes to the output image
   itk::ImageRegionConstIteratorWithIndex<UnsignedCharScalarImageType> imageIterator(rescaleFilter->GetOutput(), rescaleFilter->GetOutput()->GetLargestPossibleRegion());
@@ -425,8 +413,7 @@ void ITKImagetoVTKMagnitudeImage(FloatVectorImageType::Pointer image, vtkImageDa
 
 void BlankAndOutlineImage(vtkImageData* image, const unsigned char color[3])
 {
-  image->SetNumberOfScalarComponents(4);
-  image->AllocateScalars();
+  image->AllocateScalars(VTK_UNSIGNED_CHAR, 4);
   
   int dims[3];
   image->GetDimensions(dims);
