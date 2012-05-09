@@ -44,10 +44,10 @@ InteractiveBestPatches.cpp
 #MyGraphicsItem.cpp
 SwitchBetweenStyle.cxx
 ${UISrcs} ${MOCSrcs})
-TARGET_LINK_LIBRARIES(InteractiveBestPatches BestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES}
-libHelpers libITKHelpers libMask libITKVTKHelpers libVTKHelpers )
+TARGET_LINK_LIBRARIES(InteractiveBestPatches BestPatches ${VTK_LIBRARIES} ${ITK_LIBRARIES} ${QT_LIBRARIES}
+libHelpers libVTKHelpers libITKHelpers libMask libITKVTKHelpers )
 INSTALL( TARGETS InteractiveBestPatches RUNTIME DESTINATION ${INSTALL_DIR} )
 
 
 ADD_EXECUTABLE(ExamplePatchDifference ExamplePatchDifference.cpp)
-TARGET_LINK_LIBRARIES(ExamplePatchDifference BestPatches ${VTK_LIBRARIES} QVTK ${ITK_LIBRARIES} ${QT_LIBRARIES})
+TARGET_LINK_LIBRARIES(ExamplePatchDifference BestPatches ${VTK_LIBRARIES} ${ITK_LIBRARIES} ${QT_LIBRARIES})
