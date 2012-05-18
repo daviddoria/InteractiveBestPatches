@@ -33,7 +33,7 @@ INCLUDE(${ITK_USE_FILE})
 add_library(BestPatches
 Patch.cpp
 SelfPatchCompare.cpp)
-TARGET_LINK_LIBRARIES(BestPatches libITKHelpers libVTKHelpers libMask libITKVTKHelpers)
+TARGET_LINK_LIBRARIES(BestPatches ITKHelpers libVTKHelpers Mask ITKVTKHelpers)
 
 ADD_EXECUTABLE(InteractiveBestPatches
 ClickableLabel.cpp
@@ -45,7 +45,7 @@ InteractiveBestPatches.cpp
 SwitchBetweenStyle.cxx
 ${UISrcs} ${MOCSrcs})
 TARGET_LINK_LIBRARIES(InteractiveBestPatches BestPatches ${VTK_LIBRARIES} ${ITK_LIBRARIES} ${QT_LIBRARIES}
-libHelpers libVTKHelpers libITKHelpers libMask libITKVTKHelpers )
+Helpers libVTKHelpers ITKHelpers Mask ITKVTKHelpers )
 INSTALL( TARGETS InteractiveBestPatches RUNTIME DESTINATION ${INSTALL_DIR} )
 
 

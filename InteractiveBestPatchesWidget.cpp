@@ -232,7 +232,7 @@ void InteractiveBestPatchesWidget::LoadImage(const std::string& fileName)
   this->Image = FloatVectorImageType::New();
   ITKHelpers::DeepCopy(reader->GetOutput(), this->Image.GetPointer());
 
-  ITKVTKHelpers::ITKVectorImageToVTKImageFromDimension(this->Image, this->VTKImage);
+  ITKVTKHelpers::ITKVectorImageToVTKImageFromDimension(this->Image.GetPointer(), this->VTKImage);
 
   this->statusBar()->showMessage("Opened image.");
   actionOpenMask->setEnabled(true);
